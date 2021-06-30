@@ -7,18 +7,22 @@ import productRoutes from "./routes/productRoutes.js";
 import categoriesRoutes from "./routes/categoriesRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
+import { errorHandler } from "./middleware/jwtSecure.js";
 //initialization of server
 const app = express();
-app.use(cors());
-app.options("*", cors());
+
 dotenv.config();
 connectDB();
+
+app.use(cors());
+app.options("*", cors());
 app.use(morgan("tiny"));
+app.use(errorHandler);
 
 //declaration of constants
 const api = process.env.API_URL;
 
-// req.body for post request
+// req.body for post request middleware
 app.use(express.json());
 
 //routes
