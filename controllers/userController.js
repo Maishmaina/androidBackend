@@ -33,7 +33,7 @@ const registerUser = async (req, res) => {
 
   const userExists = await User.findOne({ email });
   if (userExists) {
-    res.status(400).send("User already exists");
+    res.status(400).json({ message: "User already exists" });
   }
   const passwordHash = bcrypt.hashSync(password, 10);
   const user = await User.create({
@@ -89,10 +89,44 @@ const loginUser = async (req, res) => {
         expiresIn: "1d",
       }
     );
-    return res.status(200).send({ user: user.email, token });
+    return res.status(200).json({ user: user.email, token });
   } else {
     return res.status(401).json({ message: "Invalid email or password" });
   }
 };
+// @desc Count Number of Users
+// @route GET /api/v1/users/get/countUsers
+// @access  Private
+const countUsers = async (req, res) => {
+  try {
+    const usersCount = await User.countDocuments((count) => count);
+    if (!usersCount) {
+      res.status(500).json({ success: false, message: "Users Not Found" });
+    }
+    res.status(200).send({ usersCount: usersCount });
+  } catch (err) {
+    console.log(err);
+  }
+};
+// @desc  DELETE user
+// @route DELETE /api/v1/users/:id
+// @access  Private
 
-export { getUsers, registerUser, getSingleUser, loginUser };
+const deleteUser = async (req, res) => {
+  const user = await User.findById(req.params.id);
+  if (user) {
+    await user.remove();
+    res.status(200).json({ success: true, message: "Deleted Deleted" });
+  } else {
+    res.status(404).json({ success: false, message: "User Not Found" });
+  }
+};
+
+export {
+  getUsers,
+  registerUser,
+  getSingleUser,
+  loginUser,
+  countUsers,
+  deleteUser,
+};

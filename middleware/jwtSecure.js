@@ -9,10 +9,10 @@ const protect = async (req, res, next) => {
     try {
       token = req.headers.authorization.split(" ")[1];
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      console.log(`userID-${decoded.userid}`);
+
       //fetch user
       req.user = await User.findById(decoded.userid).select("-passwordHash");
-      console.log(`details - ${req.user}`);
+
       next();
     } catch (err) {
       console.error(err);

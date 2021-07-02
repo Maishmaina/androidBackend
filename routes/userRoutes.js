@@ -4,6 +4,8 @@ import {
   registerUser,
   getSingleUser,
   loginUser,
+  countUsers,
+  deleteUser,
 } from "../controllers/userController.js";
 import { protect, admin } from "../middleware/jwtSecure.js";
 
@@ -11,7 +13,10 @@ import { protect, admin } from "../middleware/jwtSecure.js";
 const router = express.Router();
 
 router.route(`/`).get(protect, admin, getUsers).post(registerUser);
-router.route("/:id").get(protect, getSingleUser);
+router
+  .route("/:id")
+  .get(protect, getSingleUser)
+  .delete(protect, admin, deleteUser);
 router.post("/login", loginUser);
-
+router.route("/get/countUsers").get(countUsers);
 export default router;
