@@ -5,13 +5,13 @@ import {
   getSingleUser,
   loginUser,
 } from "../controllers/userController.js";
-import { protect } from "../middleware/jwtSecure.js";
+import { protect, admin } from "../middleware/jwtSecure.js";
 
 //instantiate express
 const router = express.Router();
 
-router.route(`/`).get(protect, getUsers).post(registerUser);
-router.route("/:id").get(getSingleUser);
+router.route(`/`).get(protect, admin, getUsers).post(registerUser);
+router.route("/:id").get(protect, getSingleUser);
 router.post("/login", loginUser);
 
 export default router;

@@ -51,7 +51,7 @@ const registerUser = async (req, res) => {
   if (user) {
     res.status(201).send(user);
   } else {
-    res.status(400).send("Invalid User Data");
+    res.status(400).json("Invalid User Data");
   }
 };
 // @desc  Fetch single users
@@ -62,7 +62,7 @@ const getSingleUser = async (req, res) => {
   try {
     const result = await User.findById(req.params.id).select("-passwordHash");
     if (!result) {
-      res.status(500).send("No User found with that details");
+      res.status(500).json({ message: "No User found with that details" });
     }
     res.status(200).json(result);
   } catch (err) {
@@ -79,15 +79,19 @@ const loginUser = async (req, res) => {
 
   const user = await User.findOne({ email });
   if (!user) {
-    return res.status(401).send("User Not Found");
+    return res.status(401).json({ message: "User Not Found" });
   }
   if (user && bcrypt.compareSync(password, user.passwordHash)) {
-    const token = jwt.sign({ userid: user.id }, process.env.JWT_SECRET, {
-      expiresIn: "1d",
-    });
+    const token = jwt.sign(
+      { userid: user.id, isAdmin: user.isAdmin },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "1d",
+      }
+    );
     return res.status(200).send({ user: user.email, token });
   } else {
-    return res.status(401).send("Invalid email or password");
+    return res.status(401).json({ message: "Invalid email or password" });
   }
 };
 

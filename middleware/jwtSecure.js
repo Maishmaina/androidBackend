@@ -1,4 +1,5 @@
 import jwt from "jsonwebtoken";
+import User from "../models/userModel.js";
 const protect = async (req, res, next) => {
   let token;
   if (
@@ -8,14 +9,29 @@ const protect = async (req, res, next) => {
     try {
       token = req.headers.authorization.split(" ")[1];
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      console.log(`userID-${decoded.userid}`);
+      //fetch user
+      req.user = await User.findById(decoded.userid).select("-passwordHash");
+      console.log(`details - ${req.user}`);
       next();
     } catch (err) {
       console.error(err);
-      res.status(401).send("Not Authorized Token Failed");
+      res.status(401).json({ message: "Not Authorized Token Failed" });
     }
   }
   if (!token) {
-    res.status(401).send("Not Authorized Method Failed");
+    res.status(401).json({ message: "Not Authorized Method Failed" });
+  }
+};
+
+//test if is admin
+const admin = (req, res, next) => {
+  if (req.user && req.user.isAdmin) {
+    next();
+  } else {
+    res
+      .status(401)
+      .json({ message: "Application Crashed, something went wrong" });
   }
 };
 
@@ -25,9 +41,9 @@ const errorHandler = (err, req, res, next) => {
     return res.status(500).json({ message: "This user is not authorized" });
   }
   if (err.name === "ValidationError") {
-    return res.status(500).json({ message: "The user is not authorized" });
+    return res.status(500).json({ message: err });
   }
   return res.status(500).json({ message: err });
   next();
 };
-export { protect, errorHandler };
+export { protect, errorHandler, admin };

@@ -6,15 +6,15 @@ import {
   getCategoryById,
   updateCategory,
 } from "../controllers/categoriesController.js";
-
+import { protect } from "../middleware/jwtSecure.js";
 //instantiate express
 const router = express.Router();
 
-router.route(`/`).get(getCategories).post(addCategory);
+router.route(`/`).get(getCategories).post(protect, addCategory);
 router
   .route("/:id")
-  .delete(deleteCategory)
+  .delete(protect, deleteCategory)
   .get(getCategoryById)
-  .put(updateCategory);
+  .put(protect, updateCategory);
 
 export default router;
