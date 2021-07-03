@@ -12,6 +12,14 @@ const categorySchema = mongoose.Schema({
     type: String,
   },
 });
+//generate user friendly id
+categorySchema.virtual("id").get(function () {
+  return this._id.toHexString();
+});
+categorySchema.set("toJSON", {
+  virtuals: true,
+});
+
 const Category = mongoose.model("Category", categorySchema);
 
 export default Category;
