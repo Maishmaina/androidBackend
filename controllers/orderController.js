@@ -18,14 +18,17 @@ const getOrders = async (req, res) => {
 // @route POST /api/v1/orders
 // @access  Public
 const addOrderItems = async (req, res) => {
-  const orderItems = req.body.orderItems.map((orderItem) => {
-    let newOrderItem = new OrderItem({
-      quantity: orderItem.quantity,
-      product: orderItem.product,
-    });
-    newOrderItem = await newOrderItem.save();
-    return newOrderItem._id;
-  });
+  const orderItemIds = Promise.all(
+    req.body.orderItems.map(async (orderItem) => {
+      let newOrderItem = new OrderItem({
+        quantity: orderItem.quantity,
+        product: orderItem.product,
+      });
+      newOrderItem = await newOrderItem.save();
+      return newOrderItem._id;
+    })
+  );
+  const orderItemIdResolved = await orderItemIds;
   const {
     shippingAddress1,
     shippingAddress2,
@@ -37,7 +40,7 @@ const addOrderItems = async (req, res) => {
     user,
     totalPrice,
   } = req.body;
-
+  let orderItems = orderItemIdResolved;
   if (!orderItems) {
     res.status(400).json({ message: "No order item Found" });
     return;
