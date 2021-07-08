@@ -48,6 +48,18 @@ const addOrderItems = async (req, res) => {
     })
   );
   const orderItemIdResolved = await orderItemIds;
+  const totalPrices = await Promise.all(
+    orderItemIdResolved.map(async (orderItemId) => {
+      const orderItem = await OrderItem.findById(orderItemId).populate(
+        "product",
+        "price"
+      );
+      const totalPrice = orderItem.product.price * orderItem.quantity;
+      return totalPrice;
+    })
+  );
+  const totalPrice = totalPrices.reduce((a, b) => a + b, 0);
+  console.log(totalPrice);
   const {
     shippingAddress1,
     shippingAddress2,
@@ -57,7 +69,6 @@ const addOrderItems = async (req, res) => {
     phone,
     status,
     user,
-    totalPrice,
   } = req.body;
   let orderItems = orderItemIdResolved;
   if (!orderItems) {
@@ -113,4 +124,40 @@ const deleteOrder = async (req, res) => {
     res.status(404).json({ success: false, message: "Order Not Found" });
   }
 };
-export { getOrders, addOrderItems, getOrderById, updateOrder, deleteOrder };
+
+// @desc  GET tgotal sales
+// @route GET /api/v1/orders/get/totalsales
+// @access  Private/admin
+const getTotalSales = async (req, res) => {
+  const totalSales = await Order.aggregate([
+    { $group: { _id: null, totalsales: { $sum: "$totalPrice" } } },
+  ]);
+  if (!totalSales) {
+    return res.status(400).json({ message: "Total sales cannot be generated" });
+  }
+  res.status(200).json({ totalsales: totalSales.pop().totalsales });
+};
+// @desc Count Number Order
+// @route GET /api/v1/orders/get/countOrders
+// @access  Private
+const countOrder = async (req, res) => {
+  try {
+    const orderCount = await Order.countDocuments((count) => count);
+    if (!orderCount) {
+      res.status(500).json({ success: false, message: "Order Not Found" });
+    }
+    res.status(200).send({ orderCount: orderCount });
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+export {
+  getOrders,
+  addOrderItems,
+  getOrderById,
+  updateOrder,
+  deleteOrder,
+  getTotalSales,
+  countOrder,
+};

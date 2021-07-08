@@ -5,6 +5,8 @@ import {
   getOrderById,
   updateOrder,
   deleteOrder,
+  getTotalSales,
+  countOrder,
 } from "../controllers/orderController.js";
 import { admin, protect } from "../middleware/jwtSecure.js";
 
@@ -17,5 +19,7 @@ router
   .get(protect, getOrderById)
   .put(protect, admin, updateOrder)
   .delete(protect, admin, deleteOrder);
+router.get("/get/totalsales", protect, admin, getTotalSales);
+router.get("/get/countOrders", protect, admin, countOrder);
 
 export default router;
