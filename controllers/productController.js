@@ -28,12 +28,19 @@ const createdProduct = async (req, res) => {
   if (!findCategory) {
     return res.status(400).send("Invalid Category");
   }
+  const file = req.file;
+  if (!file) {
+    return res.status(400).send("No Image in the Request");
+  }
+
+  const fileName = req.file.filename;
+  const basePath = `${req.protocol}://${req.get("host")}/public/uploads/`;
 
   const product = new Product({
     name: req.body.name,
     description: req.body.description,
     richDescription: req.body.richDescription,
-    image: req.body.image,
+    image: `${basePath}${fileName}`,
     brand: req.body.brand,
     price: req.body.price,
     category: req.body.category,
@@ -156,6 +163,33 @@ const featuredProduct = async (req, res) => {
   }
 };
 
+// @desc Update a product image Gallery
+// @route PUT /api/v1/products/gallery-images:id
+// @access  Private
+const uploadImageGallery = async (req, res) => {
+  if (!mongoose.isValidObjectId(req.params.id)) {
+    res.status(400).send("Invalid Product Details");
+  }
+  const files = req.files;
+  let imagesPaths = [];
+  const basePath = `${req.protocol}://${req.get("host")}/public/uploads/`;
+  if (files) {
+    files.map((file) => {
+      imagesPaths.push(`${basePath}${file.filename}`);
+    });
+  }
+
+  const product = await Product.findByIdAndUpdate(
+    req.params.id,
+    { images: imagesPaths },
+    { new: true }
+  );
+  if (!product) {
+    return res.status(500).send("The product cannot be updated");
+  }
+  res.status(200).json(product);
+};
+
 export {
   getProducts,
   createdProduct,
@@ -164,4 +198,5 @@ export {
   deleteProduct,
   countProduct,
   featuredProduct,
+  uploadImageGallery,
 };

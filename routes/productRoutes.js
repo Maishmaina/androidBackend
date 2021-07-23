@@ -7,13 +7,18 @@ import {
   deleteProduct,
   countProduct,
   featuredProduct,
+  uploadImageGallery,
 } from "../controllers/productController.js";
 import { protect, admin } from "../middleware/jwtSecure.js";
+import { uploadOptions } from "../middleware/imageUploadHandler.js";
 
 //instantiate express
 const router = express.Router();
 
-router.route(`/`).get(getProducts).post(protect, admin, createdProduct);
+router
+  .route(`/`)
+  .get(getProducts)
+  .post(protect, admin, uploadOptions.single("image"), createdProduct);
 router
   .route("/:id")
   .get(getProductById)
@@ -21,4 +26,7 @@ router
   .delete(protect, admin, deleteProduct);
 router.route("/get/countProducts").get(countProduct);
 router.route("/get/featuredProducts/:count").get(featuredProduct);
+router
+  .route("/gallery-images/:id")
+  .put(protect, admin, uploadOptions.array("images", 5), uploadImageGallery);
 export default router;

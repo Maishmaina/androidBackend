@@ -19,7 +19,7 @@ const productSchema = mongoose.Schema({
   },
   images: [
     {
-      tyoe: String,
+      type: String,
     },
   ],
   brand: {

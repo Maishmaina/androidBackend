@@ -1,3 +1,4 @@
+import path from "path";
 import express from "express";
 import dotenv from "dotenv";
 import morgan from "morgan";
@@ -18,6 +19,10 @@ app.use(cors());
 app.options("*", cors());
 app.use(morgan("tiny"));
 app.use(errorHandler);
+//make image files accessible
+
+const __dirname = path.resolve();
+app.use("/public/uploads", express.static(__dirname + "/public/uploads"));
 
 //declaration of constants
 const api = process.env.API_URL;
