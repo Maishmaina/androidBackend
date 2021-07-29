@@ -152,6 +152,24 @@ const countOrder = async (req, res) => {
   }
 };
 
+// @desc  Fetch order by Userid
+// @route GET /api/v1/orders/get/userorders/:userid
+// @access  Private
+
+const getOrderByUserId = async (req, res) => {
+  try {
+    const result = await Order.find({ user: req.params.userid })
+      .populate({
+        path: "orderItems",
+        populate: { path: "product", populate: "category" },
+      })
+      .sort({ dateOrdered: -1 });
+    res.status(200).json(result);
+  } catch (err) {
+    res.status(500).json({ error: err, success: false });
+  }
+};
+
 export {
   getOrders,
   addOrderItems,
@@ -160,4 +178,5 @@ export {
   deleteOrder,
   getTotalSales,
   countOrder,
+  getOrderByUserId,
 };

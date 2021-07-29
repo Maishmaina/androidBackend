@@ -7,6 +7,7 @@ import {
   deleteOrder,
   getTotalSales,
   countOrder,
+  getOrderByUserId,
 } from "../controllers/orderController.js";
 import { admin, protect } from "../middleware/jwtSecure.js";
 
@@ -21,5 +22,6 @@ router
   .delete(protect, admin, deleteOrder);
 router.get("/get/totalsales", protect, admin, getTotalSales);
 router.get("/get/countOrders", protect, admin, countOrder);
+router.get("/get/userorders/:userid", protect, getOrderByUserId);
 
 export default router;
